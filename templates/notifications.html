@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background Effects */
+        .notification-bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            animation: float 20s infinite linear;
+        }
+
+        .morphing-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            mix-blend-mode: multiply;
+            animation: morph 8s ease-in-out infinite;
+        }
+
+        .blob-1 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            width: 250px;
+            height: 250px;
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            bottom: 20%;
+            right: 10%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-100vh) rotate(360deg); }
+        }
+
+        @keyframes morph {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header Section */
+        .notification-icon-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .notification-bell-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .notification-bell {
+            font-size: 4rem;
+            color: #fbbf24;
+            animation: bellRing 2s infinite;
+            filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.5));
+        }
+
+        .notification-pulse {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            border: 2px solid #fbbf24;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 2s infinite;
+        }
+
+        .notification-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            animation: glow 3s infinite;
+        }
+
+        @keyframes bellRing {
+            0%, 100% { transform: rotate(0deg); }
+            10% { transform: rotate(10deg); }
+            20% { transform: rotate(-10deg); }
+            30% { transform: rotate(10deg); }
+            40% { transform: rotate(-10deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+        }
+
+        @keyframes glow {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .gradient-text {
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .typewriter {
+            overflow: hidden;
+            border-right: 3px solid #667eea;
+            white-space: nowrap;
+            margin: 0 auto;
+            animation: typing 3s steps(13, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #667eea; }
+        }
+
+        .notification-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fbbf24;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .stat-label {
+            color: white;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Notifications Grid */
+        .notifications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .notification-card-enhanced {
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .notification-card-enhanced:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .notification-inner {
+            padding: 2rem;
+            position: relative;
+        }
+
+        .notification-type-icon {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .icon-background {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .icon-pulse {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 60px;
+            height: 60px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            animation: iconPulse 2s infinite;
+        }
+
+        @keyframes iconPulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .notification-category {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .notification-priority {
+            color: #fbbf24;
+            font-size: 1.2rem;
+        }
+
+        .notification-message {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #374151;
+            margin-bottom: 1.5rem;
+        }
+
+        .notification-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-time {
+            display: flex;
+            align-items: center;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 50%;
+            background: #f3f4f6;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Empty State */
+        .empty-notifications-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 3rem;
+        }
+
+        .empty-state-illustration {
+            margin-bottom: 2rem;
+        }
+
+        .empty-bell {
+            position: relative;
+            display: inline-block;
+            font-size: 5rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .empty-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: particleFloat 3s infinite ease-in-out;
+        }
+
+        .particle:nth-child(1) { top: 20%; left: 30%; animation-delay: 0s; }
+        .particle:nth-child(2) { top: 40%; right: 25%; animation-delay: 1s; }
+        .particle:nth-child(3) { bottom: 30%; left: 40%; animation-delay: 2s; }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translateY(0px) scale(1); opacity: 0.7; }
+            50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+        }
+
+        .empty-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .empty-description {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            max-width: 400px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Buttons */
+        .glow-button, .neon-button, .refresh-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .glow-button:hover, .neon-button:hover, .refresh-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Floating Action Button */
+        .floating-actions {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+        }
+
+        .fab-container {
+            position: relative;
+        }
+
+        .fab-main {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .fab-main:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        .fab-options {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .fab-container:hover .fab-options {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .fab-option {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            color: #667eea;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .fab-option:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Animations */
+        .fade-in-down {
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+        .delay-6 { animation-delay: 0.6s; }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes rippleEffect {
+            to {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .notifications-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .gradient-text {
+                font-size: 2.5rem;
+            }
+
+            .notification-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Animated Background Elements -->
+        <div class="notification-bg-effects">
+            <div class="floating-particles"></div>
+            <div class="morphing-blob blob-1"></div>
+            <div class="morphing-blob blob-2"></div>
+        </div>
+
+        <!-- Header Section -->
+        <div class="fade-in-down">
+            <div style="text-align: center;">
+                <div class="notification-icon-container">
+                    <div class="notification-bell-wrapper">
+                        <i class="fas fa-bell notification-bell"></i>
+                        <div class="notification-pulse"></div>
+                        <div class="notification-glow"></div>
+                    </div>
+                </div>
+                <h1 class="gradient-text typewriter">Notifications</h1>
+                <p style="font-size: 1.125rem; color: rgba(255, 255, 255, 0.9); max-width: 600px; margin: 0 auto 2rem; line-height: 1.6;">
+                    Stay connected with your world through real-time updates, important alerts, and personalized activity insights
+                </p>
+                <div class="notification-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Active</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Unread</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Grid -->
+        <div class="notifications-container">
+            <div class="notifications-grid" role="list" aria-label="Notifications">
+                <!-- Sample Notification 1 -->
+                <div class="notification-card-enhanced fade-in-up delay-1" role="listitem">
+                    <div class="notification-inner">
+                        <div class="notification-type-icon">
+                            <div class="icon-background">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="icon-pulse"></div>
+                        </div>
+
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <span class="notification-category">System Update</span>
+                                <div class="notification-priority">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <p class="notification-message">Your system has been successfully updated to version 2.1.4. New features include enhanced security protocols and improved performance metrics.</p>
+                            <div class="notification-footer">
+                                <div class="notification-time">
+                                    <i class="fas fa-clock" style="margin-right: 0.5rem;"></i>
+                                    <span>2 minutes ago</span>
+                                </div>
+                                <div class="notification-actions">
+                                    <button class="action-btn mark-read" title="Mark as read" aria-label="Mark as read">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="action-btn bookmark" title="Bookmark" aria-label="Bookmark">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                    <button class="action-btn delete" title="Delete" aria-label="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Notification 2 -->
+                <div class="notification-card-enhanced fade-in-up delay-2" role="listitem">
+                    <div class="notification-inner">
+                        <div class="notification-type-icon">
+                            <div class="icon-background">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="icon-pulse"></div>
+                        </div>
+
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <span class="notification-category">New Connection</span>
+                                <div class="notification-priority">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <p class="notification-message">Sarah Johnson has requested to connect with you. View their profile to accept or decline the connection request.</p>
+                            <div class="notification-footer">
+                                <div class="notification-time">
+                                    <i class="fas fa-clock" style="margin-right: 0.5rem;"></i>
+                                    <span>15 minutes ago</span>
+                                </div>
+                                <div class="notification-actions">
+                                    <button class="action-btn mark-read" title="Mark as read" aria-label="Mark as read">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="action-btn bookmark" title="Bookmark" aria-label="Bookmark">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                    <button class="action-btn delete" title="Delete" aria-label="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Notification 3 -->
+                <div class="notification-card-enhanced fade-in-up delay-3" role="listitem">
+                    <div class="notification-inner">
+                        <div class="notification-type-icon">
+                            <div class="icon-background">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="icon-pulse"></div>
+                        </div>
+
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <span class="notification-category">Reminder</span>
+                                <div class="notification-priority">
+                                    <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
+                                </div>
+                            </div>
+                            <p class="notification-message">Don't forget about your team meeting scheduled for 3:00 PM today. The agenda includes quarterly review and project planning.</p>
+                            <div class="notification-footer">
+                                <div class="notification-time">
+                                    <i class="fas fa-clock" style="margin-right: 0.5rem;"></i>
+                                    <span>1 hour ago</span>
+                                </div>
+                                <div class="notification-actions">
+                                    <button class="action-btn mark-read" title="Mark as read" aria-label="Mark as read">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="action-btn bookmark" title="Bookmark" aria-label="Bookmark">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                    <button class="action-btn delete" title="Delete" aria-label="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Notification 4 -->
+                <div class="notification-card-enhanced fade-in-up delay-4" role="listitem">
+                    <div class="notification-inner">
+                        <div class="notification-type-icon">
+                            <div class="icon-background">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="icon-pulse"></div>
+                        </div>
+
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <span class="notification-category">Achievement</span>
+                                <div class="notification-priority">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <p class="notification-message">Congratulations! You've completed your monthly productivity goal. Keep up the excellent work and maintain your momentum.</p>
+                            <div class="notification-footer">
+                                <div class="notification-time">
+                                    <i class="fas fa-clock" style="margin-right: 0.5rem;"></i>
+                                    <span>3 hours ago</span>
+                                </div>
+                                <div class="notification-actions">
+                                    <button class="action-btn mark-read" title="Mark as read" aria-label="Mark as read">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="action-btn bookmark" title="Bookmark" aria-label="Bookmark">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                    <button class="action-btn delete" title="Delete" aria-label="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Notification 5 -->
+                <div class="notification-card-enhanced fade-in-up delay-5" role="listitem">
+                    <div class="notification-inner">
+                        <div class="notification-type-icon">
+                            <div class="icon-background">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="icon-pulse"></div>
+                        </div>
+
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <span class="notification-category">Security Alert</span>
+                                <div class="notification-priority">
+                                    <i class="fas fa-exclamation-circle" style="color: #ef4444;"></i>
+                                </div>
+                            </div>
+                            <p class="notification-message">A new login was detected from an unrecognized device. If this wasn't you, please secure your account immediately.</p>
+                            <div class="notification-footer">
+                                <div class="notification-time">
+                                    <i class="fas fa-clock" style="margin-right: 0.5rem;"></i>
+                                    <span>5 hours ago</span>
+                                </div>
+                                <div class="notification-actions">
+                                    <button class="action-btn mark-read" title="Mark as read" aria-label="Mark as read">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="action-btn bookmark" title="Bookmark" aria-label="Bookmark">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                    <button class="action-btn delete" title="Delete" aria-label="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 3rem;" class="fade-in-up delay-6">
+                <button class="glow-button">
+                    <span>Load More Notifications</span>
+                    <i class="fas fa-chevron-down" style="margin-left: 0.5rem;"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Floating Action Button -->
+        <div class="floating-actions">
+            <div class="fab-container">
+                <button class="fab-main" title="Notification Settings" aria-label="Notification Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <div class="fab-options">
+                    <button class="fab-option" title="Mark All Read" aria-label="Mark All Read">
+                        <i class="fas fa-check-double"></i>
+                    </button>
+                    <button class="fab-option" title="Filter" aria-label="Filter">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                    <button class="fab-option" title="Settings" aria-label="Settings">
+                        <i class="fas fa-sliders-h"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Action button interactions
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // Button press animation
+                    this.style.transform = 'scale(0.9)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                    
+                    // Button-specific actions
+                    if (this.classList.contains('mark-read')) {
+                        this.innerHTML = '<i class="fas fa-check"></i>';
+                        this.style.background = '#10b981';
+                        this.style.color = 'white';
+                        
+                        // Add visual feedback to the notification card
+                        const card = this.closest('.notification-card-enhanced');
+                        card.style.opacity = '0.7';
+                        card.style.filter = 'grayscale(0.3)';
+                        
+                    } else if (this.classList.contains('bookmark')) {
+                        this.style.background = '#3b82f6';
+                        this.style.color = 'white';
+                        
+                        // Add bookmark visual effect
+                        const card = this.closest('.notification-card-enhanced');
+                        card.style.borderLeft = '4px solid #3b82f6';
+                        
+                    } else if (this.classList.contains('delete')) {
+                        const card = this.closest('.notification-card-enhanced');
+                        
+                        // Animate card removal
+                        card.style.transform = 'translateX(100%)';
+                        card.style.opacity = '0';
+                        card.style.transition = 'all 0.3s ease';
+                        
+                        setTimeout(() => {
+                            card.remove();
+                            updateNotificationStats();
+                        }, 300);
+                    }
+                });
+            });
+
+            // Notification card click ripple effect
+            document.querySelectorAll('.notification-card-enhanced').forEach(card => {
+                card.addEventListener('click', function(event) {
+                    // Don't trigger if clicking on action buttons
+                    if (event.target.closest('.action-btn')) return;
+                    
+                    const ripple = document.createElement('div');
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(139, 92, 246, 0.3);
+                        transform: scale(0);
+                        animation: rippleEffect 0.6s ease-out;
+                        pointer-events: none;
+                        z-index: 10;
+                    `;
+                    
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
+                    ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
+                    
+                    this.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+
+            // Load more button interaction
+            const loadMoreBtn = document.querySelector('.glow-button');
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', function() {
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                    this.disabled = true;
+                    
+                    // Simulate loading
+                    setTimeout(() => {
+                        this.innerHTML = '<span>Load More Notifications</span><i class="fas fa-chevron-down" style="margin-left: 0.5rem;"></i>';
+                        this.disabled = false;
+                        
+                        // Show success message
+                        showToast('No more notifications to load', 'info');
+                    }, 2000);
+                });
+            }
+
+            // FAB interaction
+            const fabMain = document.querySelector('.fab-main');
+            const fabOptions = document.querySelector('.fab-options');
+            let fabOpen = false;
+
+            if (fabMain) {
+                fabMain.addEventListener('click', function() {
+                    fabOpen = !fabOpen;
+                    if (fabOpen) {
+                        fabOptions.style.opacity = '1';
+                        fabOptions.style.transform = 'translateY(0)';
+                        fabOptions.style.pointerEvents = 'all';
+                        this.style.transform = 'scale(1.1) rotate(45deg)';
+                    } else {
+                        fabOptions.style.opacity = '0';
+                        fabOptions.style.transform = 'translateY(20px)';
+                        fabOptions.style.pointerEvents = 'none';
+                        this.style.transform = 'scale(1) rotate(0deg)';
+                    }
+                });
+            }
+
+            // FAB option interactions
+            document.querySelectorAll('.fab-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const icon = this.querySelector('i');
+                    
+                    if (icon.classList.contains('fa-check-double')) {
+                        markAllAsRead();
+                        showToast('All notifications marked as read', 'success');
+                    } else if (icon.classList.contains('fa-filter')) {
+                        showToast('Filter options coming soon', 'info');
+                    } else if (icon.classList.contains('fa-sliders-h')) {
+                        showToast('Settings panel coming soon', 'info');
+                    }
+                    
+                    // Close FAB menu
+                    fabOpen = false;
+                    fabOptions.style.opacity = '0';
+                    fabOptions.style.transform = 'translateY(20px)';
+                    fabOptions.style.pointerEvents = 'none';
+                    fabMain.style.transform = 'scale(1) rotate(0deg)';
+                });
+            });
+
+            // Utility functions
+            function updateNotificationStats() {
+                const activeCount = document.querySelectorAll('.notification-card-enhanced').length;
+                const unreadCount = document.querySelectorAll('.notification-card-enhanced:not([data-read])').length;
+                
+                document.querySelector('.stat-number').textContent = activeCount;
+                document.querySelectorAll('.stat-number')[1].textContent = unreadCount;
+            }
+
+            function markAllAsRead() {
+                document.querySelectorAll('.notification-card-enhanced').forEach(card => {
+                    card.style.opacity = '0.7';
+                    card.style.filter = 'grayscale(0.3)';
+                    card.setAttribute('data-read', 'true');
+                    
+                    const markReadBtn = card.querySelector('.mark-read');
+                    if (markReadBtn) {
+                        markReadBtn.innerHTML = '<i class="fas fa-check"></i>';
+                        markReadBtn.style.background = '#10b981';
+                        markReadBtn.style.color = 'white';
+                    }
+                });
+                
+                updateNotificationStats();
+            }
+
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 2rem;
+                    right: 2rem;
+                    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 10px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                    z-index: 10000;
+                    transform: translateX(100%);
+                    transition: transform 0.3s ease;
+                    font-weight: 500;
+                `;
+                toast.textContent = message;
+                
+                document.body.appendChild(toast);
+                
+                // Animate in
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(0)';
+                }, 100);
+                
+                // Animate out and remove
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(100%)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // Initialize stats
+            updateNotificationStats();
+
+            // Add some dynamic behavior
+            setInterval(() => {
+                // Randomly animate notification icons
+                const icons = document.querySelectorAll('.notification-bell, .icon-background i');
+                const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+                
+                if (randomIcon && Math.random() < 0.1) { // 10% chance every interval
+                    randomIcon.style.animation = 'none';
+                    setTimeout(() => {
+                        randomIcon.style.animation = '';
+                    }, 100);
+                }
+            }, 2000);
+
+            // Smooth scroll for page interactions
+            document.documentElement.style.scrollBehavior = 'smooth';
+
+            // Add intersection observer for animation triggers
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all notification cards for scroll animations
+            document.querySelectorAll('.notification-card-enhanced').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+
+        // Add CSS for additional animations
+        const additionalStyles = document.createElement('style');
+        additionalStyles.textContent = `
+            @keyframes rippleEffect {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+            
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            
+            .notification-card-enhanced[data-read] {
+                opacity: 0.7 !important;
+                filter: grayscale(0.3) !important;
+            }
+            
+            .glow-button:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+                transform: none !important;
+            }
+            
+            /* Additional hover effects */
+            .notification-card-enhanced:hover .notification-type-icon .icon-background {
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+            }
+            
+            .notification-card-enhanced:hover .notification-category {
+                transform: scale(1.05);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            }
+            
+            /* Smooth transitions for all interactive elements */
+            * {
+                transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease;
+            }
+            
+            /* Custom scrollbar */
+            ::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            ::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 4px;
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                border-radius: 4px;
+            }
+            
+            ::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(45deg, #764ba2, #667eea);
+            }
+        `;
+        document.head.appendChild(additionalStyles);
+    </script>
+</body>
+</html>

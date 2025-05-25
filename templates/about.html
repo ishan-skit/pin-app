@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Page Header -->
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-purple-700">About MPIN Analyzer</h1>
+    <p class="text-gray-600 mt-2">
+        Learn more about the purpose of this tool, the technologies behind it, and the developer.
+    </p>
+</div>
+
+<!-- About Section -->
+<div class="bg-white rounded-xl shadow p-6 space-y-6">
+
+    <!-- Developer Info -->
+    <section>
+        <h2 class="text-xl font-semibold text-purple-600 mb-2">👨‍💻 Developer</h2>
+        <p class="text-gray-700 text-sm">
+            Hi, I’m <strong>Ishan Jain</strong>, the creator of this web-based MPIN Analyzer application.
+            I'm a Computer Science Engineering student passionate about cybersecurity, web development, and problem solving.
+            <br><br>
+            For any queries or suggestions, feel free to contact me at:
+            <br>
+            📧 <a href="mailto:ishanjain256@gmail.com" class="text-blue-600 hover:underline">ishanjain256@gmail.com</a>
+        </p>
+    </section>
+
+    <!-- App Purpose -->
+    <section>
+        <h2 class="text-xl font-semibold text-purple-600 mb-2">🔐 What is MPIN Analyzer?</h2>
+        <p class="text-gray-700 text-sm">
+            <strong>MPIN Analyzer</strong> is a security evaluation tool designed to check the strength of your Mobile PIN (MPIN).
+            It helps identify weak patterns such as:
+        </p>
+        <ul class="list-disc list-inside mt-2 text-sm text-gray-700">
+            <li>Commonly used or guessable PINs (like 1234, 0000, 111111)</li>
+            <li>Sequential patterns (e.g., 123456 or 4321)</li>
+            <li>Personal demographic matches (e.g., birthdays, anniversaries)</li>
+        </ul>
+        <p class="text-sm text-gray-700 mt-2">
+            By analyzing these aspects, the app gives a score and strength label (e.g., WEAK or STRONG) and provides suggestions to improve your PIN security.
+        </p>
+    </section>
+
+    <!-- Features -->
+    <section>
+        <h2 class="text-xl font-semibold text-purple-600 mb-2">🚀 Features</h2>
+        <ul class="list-disc list-inside text-sm text-gray-700">
+            <li>4-digit and 6-digit MPIN support</li>
+            <li>Optional demographic fields (DOB, Spouse DOB, Anniversary)</li>
+            <li>Score out of 10 with explanation for each rating</li>
+            <li>Dynamic client-side validation and result display</li>
+            <li>Results page with visual feedback and export option</li>
+            <li>Simple, responsive UI using Tailwind CSS</li>
+        </ul>
+    </section>
+
+    <!-- Tech Stack -->
+    <section>
+        <h2 class="text-xl font-semibold text-purple-600 mb-2">🛠️ Technologies Used</h2>
+        <ul class="list-disc list-inside text-sm text-gray-700">
+            <li><strong>Frontend:</strong> HTML5, Jinja2, Tailwind CSS, JavaScript</li>
+            <li><strong>Backend:</strong> Python, Flask</li>
+            <li><strong>Tools:</strong> Font Awesome, Fetch API, Flask-CORS</li>
+        </ul>
+    </section>
+
+    <!-- Future Improvements -->
+    <section>
+        <h2 class="text-xl font-semibold text-purple-600 mb-2">📈 Future Plans</h2>
+        <ul class="list-disc list-inside text-sm text-gray-700">
+            <li>Add user login & history tracking</li>
+            <li>Export results to PDF/CSV</li>
+            <li>Connect to a database (SQLite/MySQL)</li>
+            <li>PIN suggestions based on entropy</li>
+        </ul>
+    </section>
+</div>
+
+<!-- Footer Note -->
+<div class="text-sm text-center text-gray-500 mt-8">
+    <p>&copy; 2025 Ishan Jain | MPIN Analyzer - Built with ❤️ and Python</p>
+</div>
+
+{% endblock %}

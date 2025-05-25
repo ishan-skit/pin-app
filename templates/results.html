@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPIN Analysis Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff);
+            background-size: 300% 300%;
+            animation: gradient 2s ease infinite;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        /* Chart container sizing */
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+        .chart-wrapper {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            animation: modalFadeIn 0.3s ease;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            animation: modalSlideIn 0.3s ease;
+        }
+        @keyframes modalSlideIn {
+            from { transform: translate(-50%, -60%); opacity: 0; }
+            to { transform: translate(-50%, -50%); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header with gradient background -->
+    <div class="gradient-bg text-white py-6 mb-6">
+        <div class="container mx-auto px-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2 animate-fade-in">
+                        <i class="fas fa-shield-alt mr-3"></i>PIN Security Analysis
+                    </h1>
+                    <p class="text-purple-100 text-base animate-fade-in">
+                        Comprehensive security assessment and vulnerability detection
+                    </p>
+                </div>
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="glassmorphism px-4 py-2 rounded-lg">
+                        <i class="fas fa-clock mr-2"></i>
+                        Last Updated: <span id="currentTime"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-6">
+        <!-- Statistics Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-lg p-4 card-hover animate-fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Total Analyzed</p>
+                        <p class="text-xl font-bold text-gray-800" id="totalCount">0</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-calculator text-blue-600 text-lg"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-4 card-hover animate-fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Strong PINs</p>
+                        <p class="text-xl font-bold text-green-600" id="strongCount">0</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-shield-check text-green-600 text-lg"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-4 card-hover animate-fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Weak PINs</p>
+                        <p class="text-xl font-bold text-red-600" id="weakCount">0</p>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-lg"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-4 card-hover animate-fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Avg Score</p>
+                        <p class="text-xl font-bold text-purple-600" id="avgScore">0</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-chart-line text-purple-600 text-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-xl shadow-lg p-4 card-hover">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                    <i class="fas fa-chart-pie mr-2 text-purple-600"></i>Security Distribution
+                </h3>
+                <div class="chart-container">
+                    <div class="chart-wrapper">
+                        <canvas id="securityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-4 card-hover">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                    <i class="fas fa-chart-bar mr-2 text-purple-600"></i>PIN Length Analysis
+                </h3>
+                <div class="chart-container">
+                    <div class="chart-wrapper">
+                        <canvas id="lengthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Results Table -->
+        <div class="bg-white shadow-xl rounded-xl overflow-hidden animate-fade-in">
+            <div class="bg-gradient-to-r from-purple-600 to-blue-600 p-4 text-white">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold mb-1">
+                            <i class="fas fa-list-alt mr-2"></i>Analysis Results
+                        </h2>
+                        <p class="text-purple-100 text-sm">Detailed security assessment for each PIN</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="exportToCSV()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 text-sm rounded-lg transition-all duration-200 backdrop-blur-sm">
+                            <i class="fas fa-download mr-1"></i>CSV
+                        </button>
+                        <button onclick="exportToPDF()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 text-sm rounded-lg transition-all duration-200 backdrop-blur-sm">
+                            <i class="fas fa-file-pdf mr-1"></i>PDF
+                        </button>
+                        <button onclick="toggleView()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 text-sm rounded-lg transition-all duration-200 backdrop-blur-sm">
+                            <i class="fas fa-eye mr-1"></i><span id="viewToggle">Cards</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div class="p-4 border-b bg-gray-50">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-1">
+                        <input type="text" id="searchInput" placeholder="Search by PIN, type, or reasons..." 
+                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                    <select id="strengthFilter" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500">
+                        <option value="">All Strengths</option>
+                        <option value="STRONG">Strong Only</option>
+                        <option value="WEAK">Weak Only</option>
+                    </select>
+                    <select id="typeFilter" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500">
+                        <option value="">All Types</option>
+                        <option value="4">4-digit</option>
+                        <option value="6">6-digit</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Table View -->
+            <div id="tableView" class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-200" onclick="sortTable(0)">
+                                # <i class="fas fa-sort ml-1"></i>
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-200" onclick="sortTable(1)">
+                                PIN <i class="fas fa-sort ml-1"></i>
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-200" onclick="sortTable(2)">
+                                Type <i class="fas fa-sort ml-1"></i>
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-200" onclick="sortTable(3)">
+                                Score <i class="fas fa-sort ml-1"></i>
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-200" onclick="sortTable(4)">
+                                Strength <i class="fas fa-sort ml-1"></i>
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Vulnerabilities
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-200" onclick="sortTable(6)">
+                                Analyzed <i class="fas fa-sort ml-1"></i>
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTable" class="bg-white divide-y divide-gray-200">
+                        <!-- Results will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Card View (Hidden by default) -->
+            <div id="cardView" class="hidden p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Cards will be populated here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden flex flex-col items-center justify-center py-12 text-center text-gray-500">
+                <div class="bg-purple-100 p-6 rounded-full mb-4">
+                    <i class="fas fa-database text-4xl text-purple-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-700">No Analysis Records</h3>
+                <p class="text-gray-500 mb-4 max-w-md">Start analyzing PINs to see detailed security assessments and vulnerability reports here.</p>
+                <a href="/" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-2 rounded-lg transition-all duration-200 transform hover:scale-105">
+                    <i class="fas fa-arrow-left mr-2"></i>Start Analyzing
+                </a>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="mt-6 flex justify-center">
+            <nav class="inline-flex shadow-sm rounded-md overflow-hidden">
+                <button id="prevBtn" class="px-4 py-2 bg-white border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-chevron-left mr-1"></i>Previous
+                </button>
+                <div id="pageNumbers" class="flex">
+                    <!-- Page numbers will be inserted here -->
+                </div>
+                <button id="nextBtn" class="px-4 py-2 bg-white border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Next<i class="fas fa-chevron-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-info-circle mr-2 text-purple-600"></i>PIN Analysis Details
+                </h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="modalContent">
+                <!-- Modal content will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="text-center">
+                <div class="bg-red-100 p-4 rounded-full w-16 h-16 mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Confirm Action</h3>
+                <p class="text-gray-600 mb-6" id="confirmMessage">Are you sure you want to proceed?</p>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="closeModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="confirmAction" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data - Replace with actual data from your backend
+        const sampleResults = [
+            {
+                id: 1,
+                pin: "1234",
+                pin_type: "4",
+                score: 2,
+                strength: "WEAK",
+                reasons: ["Sequential pattern", "Common PIN", "Easily guessable"],
+                timestamp: "2024-12-15 10:30:22"
+            },
+            {
+                id: 2,
+                pin: "7849",
+                pin_type: "4",
+                score: 8,
+                strength: "STRONG",
+                reasons: [],
+                timestamp: "2024-12-15 10:32:45"
+            },
+            {
+                id: 3,
+                pin: "1111",
+                pin_type: "4",
+                score: 1,
+                strength: "WEAK",
+                reasons: ["Repeated digits", "Very common PIN", "No entropy"],
+                timestamp: "2024-12-15 10:35:12"
+            },
+            {
+                id: 4,
+                pin: "982647",
+                pin_type: "6",
+                score: 9,
+                strength: "STRONG",
+                reasons: [],
+                timestamp: "2024-12-15 10:37:33"
+            },
+            {
+                id: 5,
+                pin: "123456",
+                pin_type: "6",
+                score: 1,
+                strength: "WEAK",
+                reasons: ["Sequential pattern", "Most common 6-digit PIN", "No security"],
+                timestamp: "2024-12-15 10:40:18"
+            },
+            {
+                id: 6,
+                pin: "2580",
+                pin_type: "4",
+                score: 3,
+                strength: "WEAK",
+                reasons: ["Keyboard pattern", "Predictable sequence"],
+                timestamp: "2024-12-15 10:42:33"
+            },
+            {
+                id: 7,
+                pin: "847392",
+                pin_type: "6",
+                score: 9,
+                strength: "STRONG",
+                reasons: [],
+                timestamp: "2024-12-15 10:45:18"
+            },
+            {
+                id: 8,
+                pin: "0000",
+                pin_type: "4",
+                score: 1,
+                strength: "WEAK",
+                reasons: ["All same digits", "Extremely common", "Zero security"],
+                timestamp: "2024-12-15 10:47:55"
+            }
+        ];
+
+        let currentResults = [...sampleResults];
+        let filteredResults = [...sampleResults];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let isCardView = false;
+        let sortColumn = -1;
+        let sortDirection = 'asc';
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000);
+            updateStatistics();
+            renderResults();
+            initializeCharts();
+            setupEventListeners();
+        });
+
+        function updateCurrentTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleString();
+        }
+
+        function updateStatistics() {
+            const total = filteredResults.length;
+            const strong = filteredResults.filter(r => r.strength === 'STRONG').length;
+            const weak = filteredResults.filter(r => r.strength === 'WEAK').length;
+            const avgScore = total > 0 ? (filteredResults.reduce((sum, r) => sum + r.score, 0) / total).toFixed(1) : 0;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('strongCount').textContent = strong;
+            document.getElementById('weakCount').textContent = weak;
+            document.getElementById('avgScore').textContent = avgScore;
+        }
+
+        function initializeCharts() {
+            // Security Distribution Chart
+            const securityCtx = document.getElementById('securityChart').getContext('2d');
+            const strongCount = filteredResults.filter(r => r.strength === 'STRONG').length;
+            const weakCount = filteredResults.filter(r => r.strength === 'WEAK').length;
+
+            new Chart(securityCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Strong PINs', 'Weak PINs'],
+                    datasets: [{
+                        data: [strongCount, weakCount],
+                        backgroundColor: ['#10B981', '#EF4444'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // PIN Length Chart
+            const lengthCtx = document.getElementById('lengthChart').getContext('2d');
+            const fourDigit = filteredResults.filter(r => r.pin_type === '4').length;
+            const sixDigit = filteredResults.filter(r => r.pin_type === '6').length;
+
+            new Chart(lengthCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['4-digit PINs', '6-digit PINs'],
+                    datasets: [{
+                        label: 'Count',
+                        data: [fourDigit, sixDigit],
+                        backgroundColor: ['#8B5CF6', '#06B6D4'],
+                        borderRadius: 6,
+                        maxBarThickness: 60
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderResults() {
+            const tableBody = document.getElementById('resultsTable');
+            const cardContainer = document.getElementById('cardView');
+            const emptyState = document.getElementById('emptyState');
+
+            if (filteredResults.length === 0) {
+                emptyState.classList.remove('hidden');
+                document.getElementById('tableView').classList.add('hidden');
+                cardContainer.classList.add('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            
+            if (isCardView) {
+                document.getElementById('tableView').classList.add('hidden');
+                cardContainer.classList.remove('hidden');
+                renderCardView();
+            } else {
+                document.getElementById('tableView').classList.remove('hidden');
+                cardContainer.classList.add('hidden');
+                renderTableView();
+            }
+        }
+
+        function renderTableView() {
+            const tableBody = document.getElementById('resultsTable');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageResults = filteredResults.slice(startIndex, endIndex);
+
+            tableBody.innerHTML = pageResults.map((result, index) => `
+                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                        ${startIndex + index + 1}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-mono text-purple-600">
+                        ****${result.pin.slice(-2)}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <span class="bg-gray-100 px-2 py-1 rounded-full text-xs font-medium">
+                            ${result.pin_type}-digit
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-semibold">${result.score}/10</span>
+                            <div class="w-16 bg-gray-200 h-2 rounded-full overflow-hidden">
+                                <div class="h-2 rounded-full transition-all duration-500 ${result.strength === 'WEAK' ? 'bg-red-500' : 'bg-green-500'}" 
+                                     style="width: ${result.score * 10}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold text-white
+                            ${result.strength === 'WEAK' ? 'bg-red-500' : 'bg-green-500'}">
+                            <i class="fas ${result.strength === 'WEAK' ? 'fa-exclamation-triangle' : 'fa-check'} mr-1"></i>
+                            ${result.strength}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-900 max-w-xs">
+                        ${result.reasons.length > 0 ? 
+                            `<div class="space-y-1">
+                                ${result.reasons.slice(0, 2).map(reason => `
+                                    <div class="flex items-center text-xs text-red-600">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        ${reason}
+                                    </div>
+                                `).join('')}
+                                ${result.reasons.length > 2 ? `<div class="text-xs text-gray-500">+${result.reasons.length - 2} more</div>` : ''}
+                            </div>` : 
+                            '<span class="text-green-600 text-xs"><i class="fas fa-check-circle mr-1"></i>No vulnerabilities detected</span>'
+                        }
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
+                        ${formatTimestamp(result.timestamp)}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                        <div class="flex space-x-2">
+                            <button onclick="viewDetails(${result.id})" class="text-purple-600 hover:text-purple-900 transition-colors" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="reanalyze(${result.id})" class="text-blue-600 hover:text-blue-900 transition-colors" title="Re-analyze">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                            <button onclick="deleteResult(${result.id})" class="text-red-600 hover:text-red-900 transition-colors" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            updatePagination();
+        }
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                filterResults();
+            });
+
+            // Filter functionality
+            document.getElementById('strengthFilter').addEventListener('change', function(e) {
+                filterResults();
+            });
+
+            document.getElementById('typeFilter').addEventListener('change', function(e) {
+                filterResults();
+            });
+
+            // Pagination
+            document.getElementById('prevBtn').addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderResults();
+                }
+            });
+
+            document.getElementById('nextBtn').addEventListener('click', function() {
+                const totalPages = Math.ceil(filteredResults.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderResults();
+                }
+            });
+
+            // Modal close on outside click
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    closeModal();
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+        }
+
+        function filterResults() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const strengthFilter = document.getElementById('strengthFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+
+            filteredResults = currentResults.filter(result => {
+                const matchesSearch = !searchTerm || 
+                    result.pin.includes(searchTerm) ||
+                    result.pin_type.includes(searchTerm) ||
+                    result.strength.toLowerCase().includes(searchTerm) ||
+                    result.reasons.some(reason => reason.toLowerCase().includes(searchTerm));
+
+                const matchesStrength = !strengthFilter || result.strength === strengthFilter;
+                const matchesType = !typeFilter || result.pin_type === typeFilter;
+
+                return matchesSearch && matchesStrength && matchesType;
+            });
+
+            currentPage = 1;
+            updateStatistics();
+            initializeCharts();
+            renderResults();
+        }
+
+        function sortTable(columnIndex) {
+            if (sortColumn === columnIndex) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = columnIndex;
+                sortDirection = 'asc';
+            }
+
+            filteredResults.sort((a, b) => {
+                let aVal, bVal;
+
+                switch (columnIndex) {
+                    case 0:
+                        aVal = a.id;
+                        bVal = b.id;
+                        break;
+                    case 1:
+                        aVal = a.pin;
+                        bVal = b.pin;
+                        break;
+                    case 2:
+                        aVal = parseInt(a.pin_type);
+                        bVal = parseInt(b.pin_type);
+                        break;
+                    case 3:
+                        aVal = a.score;
+                        bVal = b.score;
+                        break;
+                    case 4:
+                        aVal = a.strength;
+                        bVal = b.strength;
+                        break;
+                    case 6:
+                        aVal = new Date(a.timestamp);
+                        bVal = new Date(b.timestamp);
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+
+                if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            renderResults();
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredResults.length / itemsPerPage);
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const pageNumbers = document.getElementById('pageNumbers');
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+
+            // Generate page numbers
+            let paginationHTML = '';
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <button onclick="goToPage(${i})" 
+                            class="px-4 py-2 border border-gray-300 text-sm font-medium ${
+                                i === currentPage 
+                                    ? 'bg-purple-600 text-white border-purple-600' 
+                                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                            }">
+                        ${i}
+                    </button>
+                `;
+            }
+
+            pageNumbers.innerHTML = paginationHTML;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderResults();
+        }
+
+        function toggleView() {
+            isCardView = !isCardView;
+            document.getElementById('viewToggle').textContent = isCardView ? 'Table' : 'Cards';
+            renderResults();
+        }
+
+        function viewDetails(id) {
+            const result = currentResults.find(r => r.id === id);
+            if (!result) return;
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-sm text-gray-600 mb-1">PIN (Masked)</p>
+                            <p class="font-mono text-lg text-purple-600">****${result.pin.slice(-2)}</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-sm text-gray-600 mb-1">PIN Type</p>
+                            <p class="font-semibold">${result.pin_type}-digit PIN</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-sm text-gray-600 mb-1">Security Score</p>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-semibold text-lg">${result.score}/10</span>
+                                <div class="w-20 bg-gray-200 h-2 rounded-full">
+                                    <div class="h-2 rounded-full ${result.strength === 'WEAK' ? 'bg-red-500' : 'bg-green-500'}" 
+                                         style="width: ${result.score * 10}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-sm text-gray-600 mb-1">Strength</p>
+                            <span class="px-2 py-1 rounded-full text-sm font-semibold text-white
+                                ${result.strength === 'WEAK' ? 'bg-red-500' : 'bg-green-500'}">
+                                ${result.strength}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-2">Analysis Date</p>
+                        <p class="font-semibold">${formatTimestamp(result.timestamp)}</p>
+                    </div>
+
+                    ${result.reasons.length > 0 ? `
+                        <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                            <h4 class="font-semibold text-red-800 mb-2">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>Security Vulnerabilities
+                            </h4>
+                            <ul class="space-y-2">
+                                ${result.reasons.map(reason => `
+                                    <li class="flex items-start text-sm text-red-700">
+                                        <i class="fas fa-exclamation-circle mt-0.5 mr-2 flex-shrink-0"></i>
+                                        ${reason}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : `
+                        <div class="bg-green-50 border border-green-200 p-4 rounded-lg">
+                            <div class="flex items-center text-green-800">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <span class="font-semibold">No security vulnerabilities detected</span>
+                            </div>
+                            <p class="text-sm text-green-700 mt-2">This PIN appears to be secure based on our analysis.</p>
+                        </div>
+                    `}
+
+                    <div class="flex justify-end space-x-2 pt-4 border-t">
+                        <button onclick="reanalyze(${result.id})" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-redo mr-2"></i>Re-analyze
+                        </button>
+                        <button onclick="closeModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('detailModal').style.display = 'block';
+        }
+
+        function reanalyze(id) {
+            const result = currentResults.find(r => r.id === id);
+            if (!result) return;
+
+            // Simulate re-analysis with a slight variation
+            const newScore = Math.max(1, Math.min(10, result.score + (Math.random() - 0.5) * 2));
+            const newStrength = newScore >= 6 ? 'STRONG' : 'WEAK';
+            
+            result.score = Math.round(newScore);
+            result.strength = newStrength;
+            result.timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+            // Update filtered results if this item is in the current filter
+            const filteredIndex = filteredResults.findIndex(r => r.id === id);
+            if (filteredIndex !== -1) {
+                filteredResults[filteredIndex] = result;
+            }
+
+            updateStatistics();
+            initializeCharts();
+            renderResults();
+            closeModal();
+
+            // Show success message
+            showNotification('PIN re-analyzed successfully!', 'success');
+        }
+
+        function deleteResult(id) {
+            const result = currentResults.find(r => r.id === id);
+            if (!result) return;
+
+            document.getElementById('confirmMessage').textContent = `Are you sure you want to delete the analysis for PIN ****${result.pin.slice(-2)}?`;
+            document.getElementById('confirmAction').onclick = function() {
+                // Remove from both arrays
+                currentResults = currentResults.filter(r => r.id !== id);
+                filteredResults = filteredResults.filter(r => r.id !== id);
+
+                updateStatistics();
+                initializeCharts();
+                renderResults();
+                closeModal();
+
+                showNotification('Analysis record deleted successfully!', 'success');
+            };
+
+            document.getElementById('confirmModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white font-medium z-50 transition-all duration-300 transform translate-x-full ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 
+                'bg-blue-500'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <i class="fas ${
+                        type === 'success' ? 'fa-check-circle' :
+                        type === 'error' ? 'fa-exclamation-circle' :
+                        'fa-info-circle'
+                    }"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        function exportToCSV() {
+            const headers = ['ID', 'PIN (Masked)', 'Type', 'Score', 'Strength', 'Vulnerabilities', 'Analyzed'];
+            const rows = filteredResults.map(result => [
+                result.id,
+                `****${result.pin.slice(-2)}`,
+                `${result.pin_type}-digit`,
+                result.score,
+                result.strength,
+                result.reasons.join('; ') || 'No vulnerabilities',
+                formatTimestamp(result.timestamp)
+            ]);
+
+            let csvContent = headers.join(',') + '\n';
+            csvContent += rows.map(row => 
+                row.map(field => `"${field}"`).join(',')
+            ).join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pin_analysis_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            showNotification('CSV export completed!', 'success');
+        }
+
+        function exportToPDF() {
+            // Simple PDF export using HTML to print
+            const printWindow = window.open('', '_blank');
+            const printContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>PIN Analysis Report</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .stats { display: flex; justify-content: space-around; margin-bottom: 30px; }
+                        .stat { text-align: center; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .strong { color: green; font-weight: bold; }
+                        .weak { color: red; font-weight: bold; }
+                        @media print { body { margin: 0; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>PIN Security Analysis Report</h1>
+                        <p>Generated on: ${new Date().toLocaleString()}</p>
+                    </div>
+                    
+                    <div class="stats">
+                        <div class="stat">
+                            <h3>${filteredResults.length}</h3>
+                            <p>Total Analyzed</p>
+                        </div>
+                        <div class="stat">
+                            <h3>${filteredResults.filter(r => r.strength === 'STRONG').length}</h3>
+                            <p>Strong PINs</p>
+                        </div>
+                        <div class="stat">
+                            <h3>${filteredResults.filter(r => r.strength === 'WEAK').length}</h3>
+                            <p>Weak PINs</p>
+                        </div>
+                        <div class="stat">
+                            <h3>${(filteredResults.reduce((sum, r) => sum + r.score, 0) / filteredResults.length).toFixed(1)}</h3>
+                            <p>Average Score</p>
+                        </div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>PIN</th>
+                                <th>Type</th>
+                                <th>Score</th>
+                                <th>Strength</th>
+                                <th>Vulnerabilities</th>
+                                <th>Analyzed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filteredResults.map(result => `
+                                <tr>
+                                    <td>****${result.pin.slice(-2)}</td>
+                                    <td>${result.pin_type}-digit</td>
+                                    <td>${result.score}/10</td>
+                                    <td class="${result.strength.toLowerCase()}">${result.strength}</td>
+                                    <td>${result.reasons.join(', ') || 'No vulnerabilities'}</td>
+                                    <td>${formatTimestamp(result.timestamp)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.print();
+
+            showNotification('PDF export initiated!', 'success');
+        }
+    </script>
+</body>
+</html>
+
+ 

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title or "MPIN Analyzer" }} - Ishan Jain</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Advanced MPIN Security Analyzer - Professional security testing tool">
+    <meta name="keywords" content="MPIN, security, analyzer, authentication, testing">
+    <meta name="author" content="Ishan Jain">
+
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 25%, #6366f1 50%, #8b5cf6 75%, #a855f7 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .sidebar-gradient::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+            50% { transform: rotate(180deg) scale(1.1); opacity: 0.1; }
+        }
+
+        .nav-link {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid #fbbf24;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo-container {
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
+            50% { box-shadow: 0 8px 35px rgba(0, 0, 0, 0.25), 0 0 20px rgba(139, 92, 246, 0.3); }
+        }
+
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-header {
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .content-area {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            position: relative;
+        }
+
+        .content-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .status-indicator {
+            position: relative;
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse-status 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-status {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+
+        .social-link {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-link::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .social-link:hover::before {
+            width: 40px;
+            height: 40px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 400px;
+        }
+
+        .search-input {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .search-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .theme-toggle {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                position: fixed;
+                z-index: 999;
+                height: 100vh;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 998;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            transition: width 0.3s ease;
+            z-index: 1001;
+        }
+
+        .floating-action {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .floating-action:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 12px 35px rgba(99, 102, 241, 0.4);
+        }
+    </style>
+</head>
+<body class="flex h-screen bg-gray-100 text-gray-900">
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+
+    <!-- Mobile Sidebar Toggle -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Mobile Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar sidebar-gradient text-white w-64 flex flex-col justify-between px-6 py-8 shadow-2xl">
+        <!-- Logo & Brand -->
+        <div>
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="logo-container bg-white p-3 rounded-xl">
+                    <i class="fas fa-shield-alt text-purple-600 text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">MPIN Analyzer</h1>
+                    <p class="text-xs opacity-75">Security Suite</p>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="bg-white bg-opacity-10 rounded-xl p-4 mb-6 backdrop-filter backdrop-blur-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm opacity-90">System Status</span>
+                    <div class="status-indicator"></div>
+                </div>
+                <div class="text-2xl font-bold">Online</div>
+                <div class="text-xs opacity-75">All systems operational</div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="space-y-2">
+                <a href="/" class="nav-link block py-3 px-4 rounded-xl {% if request.path == '/' %}active{% endif %}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-home mr-3 text-lg"></i>
+                            <span class="font-medium">Dashboard</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-xs opacity-50"></i>
+                    </div>
+                </a>
+                <a href="/test" class="nav-link block py-3 px-4 rounded-xl {% if request.path == '/test' %}active{% endif %}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-vials mr-3 text-lg"></i>
+                            <span class="font-medium">Test Cases</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="notification-badge">3</span>
+                            <i class="fas fa-chevron-right text-xs opacity-50 ml-2"></i>
+                        </div>
+                    </div>
+                </a>
+                <a href="/results" class="nav-link block py-3 px-4 rounded-xl {% if request.path == '/results' %}active{% endif %}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-chart-line mr-3 text-lg"></i>
+                            <span class="font-medium">Results</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-xs opacity-50"></i>
+                    </div>
+                </a>
+                <a href="/about" class="nav-link block py-3 px-4 rounded-xl {% if request.path == '/about' %}active{% endif %}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-info-circle mr-3 text-lg"></i>
+                            <span class="font-medium">About</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-xs opacity-50"></i>
+                    </div>
+                </a>
+                <a href="/contact" class="nav-link block py-3 px-4 rounded-xl {% if request.path == '/contact' %}active{% endif %}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope mr-3 text-lg"></i>
+                            <span class="font-medium">Contact</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-xs opacity-50"></i>
+                    </div>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Footer -->
+        <div class="border-t border-white border-opacity-20 pt-6">
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-sm"></i>
+                </div>
+                <div>
+                    <div class="font-semibold">Ishan Jain</div>
+                    <div class="text-xs opacity-75">Developer</div>
+                </div>
+            </div>
+            <div class="text-xs opacity-75 mb-3">ishanjain256@gmail.com</div>
+            <div class="flex space-x-3">
+                <a href="mailto:ishanjain256@gmail.com" class="social-link w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30">
+                    <i class="fas fa-envelope text-sm"></i>
+                </a>
+                <a href="#" class="social-link w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30">
+                    <i class="fab fa-linkedin text-sm"></i>
+                </a>
+                <a href="#" class="social-link w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30">
+                    <i class="fab fa-github text-sm"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col overflow-hidden main-content">
+        <!-- Header -->
+        <header class="main-header px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                        {{ title or "Dashboard" }}
+                    </h2>
+                    <div class="hidden md:flex items-center space-x-2 text-sm text-gray-500">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="currentDate"></span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- Search Bar -->
+                    <div class="search-container hidden md:block">
+                        <input type="text" placeholder="Search..." class="search-input bg-gray-100 border-0 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    
+                    <button class="theme-toggle glow-button px-3 py-2 rounded-full flex items-center space-x-2 transition-all duration-300" data-theme-toggle id="themeToggleBtn" aria-label="Toggle Theme">
+  <i class="fas fa-moon text-white" id="themeIcon"></i>
+</button>
+
+
+
+                    
+                    <!-- Notifications -->
+<div class="relative">
+    <a href="{{ url_for('notifications') }}" title="View Notifications"
+       class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors relative">
+        <i class="fas fa-bell text-gray-600"></i>
+        <span class="notification-badge">2</span>
+    </a>
+</div>
+
+
+                    
+                    <!-- User Profile -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                            IJ
+                        </div>
+                        <div class="hidden sm:block">
+                            <div class="text-sm font-semibold text-gray-800">Ishan Jain</div>
+                            <div class="text-xs text-gray-500">Administrator</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto content-area relative">
+            <div class="p-6 fade-in">
+                {% block content %}
+                <!-- Child content injected here -->
+                {% endblock %}
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white text-gray-600 text-sm px-6 py-4 border-t">
+            <div class="flex justify-between items-center">
+                <div>&copy; 2025 Ishan Jain. All rights reserved.</div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-xs">MPIN Security Analyzer v2.1</span>
+                    <div class="flex items-center space-x-1">
+                        <div class="status-indicator"></div>
+                        <span class="text-xs">Online</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="floating-action" title="Quick Actions">
+        <i class="fas fa-plus"></i>
+    </button>
+
+   <!-- Scripts -->
+<script>
+    // Mobile sidebar toggle
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('overlay');
+
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+    });
+
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+    });
+
+    // Progress bar simulation
+    const progressBar = document.getElementById('progressBar');
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            setTimeout(() => {
+                progressBar.style.width = '0%';
+            }, 500);
+        }
+        progressBar.style.width = progress + '%';
+    }, 100);
+
+    // Current date display
+    const currentDate = document.getElementById('currentDate');
+    if (currentDate) {
+        const today = new Date();
+        const options = { 
+            weekday: 'short', 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        };
+        currentDate.textContent = today.toLocaleDateString('en-US', options);
+    }
+
+    // Theme toggle with localStorage (fixed for data-theme)
+    const themeToggle = document.querySelector('.theme-toggle');
+    const icon = themeToggle.querySelector('i');
+    const savedTheme = localStorage.getItem('theme');
+
+    // Apply saved theme on load
+    if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+    }
+
+    // Toggle theme on button click
+    themeToggle.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const newTheme = isDark ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        icon.classList.toggle('fa-sun');
+        icon.classList.toggle('fa-moon');
+    });
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Add loading states to navigation links
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (!this.classList.contains('active')) {
+                this.innerHTML += '<i class="fas fa-spinner fa-spin ml-2"></i>';
+            }
+        });
+    });
+</script>
+
+<!-- External Scripts -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+<!-- Existing JS scripts -->
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+<!-- App Initialization -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const app = new App();
+    app.init();
+
+    // 👇 THIS is the missing line that fixes your theme toggle
+    new ThemeManager();
+  });
+</script>
+
+</body>
+</html>
